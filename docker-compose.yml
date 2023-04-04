@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - centrifugo
+      - grpc_server
+
+  postgres:
+    image: "postgres:13"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:6"
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  centrifugo:
+    image: "centrifugo/centrifugo:v2"
+    command: centrifugo --config /centrifugo/config.json
+    volumes:
+      - ./centrifugo:/centrifugo
+    ports:
+      - "8000:8000"
+
+  grpc_server:
+    build: ./grpc_server
+    ports:
+      - "50051:50051"
